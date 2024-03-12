@@ -1,8 +1,9 @@
-import express from "express"
+import express, { urlencoded } from "express"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import mongoose from "mongoose"
 import {Campground} from "./models/campground.js"
+import { type } from "node:os"
 
 const app = express()
 const PORT = 8080
@@ -12,7 +13,7 @@ const __dirname = path.dirname(__filename)
 app.set("view engine", "ejs")
 app.set("views", path.join(__dirname, 'views'))
 
-
+app.use(express.urlencoded({extended:true}))
 
 async function main() {
   try{
@@ -35,7 +36,13 @@ app.get("/campgrounds", async(req,res)=>{
 })
 
 app.get("/campgrounds/new", (req,res)=>{
-  res.render("camgrounds/new")
+  res.render("campgrounds/new")
+})
+
+app.post("/campgrounds", async(req,res)=>{
+  const campground = new Campground(req.body.campground)
+  await campground.save()
+  res.redirect(`/campgrounds/${campground._id}`)
 })
 
 app.get("/campgrounds/:id", async(req,res)=>{
@@ -47,3 +54,4 @@ app.get("/campgrounds/:id", async(req,res)=>{
 app.listen(PORT, ()=>{
   console.log(`App is running on port ${PORT}`)
 })
+ 
