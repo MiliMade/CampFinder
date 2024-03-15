@@ -3,7 +3,7 @@ import path from "node:path"
 import { fileURLToPath } from "node:url"
 import mongoose from "mongoose"
 import {Campground} from "./models/campground.js"
-import { type } from "node:os"
+import methodOverride from "method-override"
 
 const app = express()
 const PORT = 8080
@@ -14,6 +14,7 @@ app.set("view engine", "ejs")
 app.set("views", path.join(__dirname, 'views'))
 
 app.use(express.urlencoded({extended:true}))
+app.use(methodOverride("_method"))
 
 async function main() {
   try{
@@ -45,10 +46,30 @@ app.post("/campgrounds", async(req,res)=>{
   res.redirect(`/campgrounds/${campground._id}`)
 })
 
+
+
 app.get("/campgrounds/:id", async(req,res)=>{
   const campground = await Campground.findById(req.params.id)
-  console.log(campground)
   res.render("campgrounds/show", {campground})
+})
+
+
+app.get("/campgrounds/:id/edit", async(req,res)=>{
+  const {id} = req.params
+  const campground = await Campground.findById(id)
+  res.render("campgrounds/edit", {campground})
+})
+
+app.put("/campgrounds/:id", async(req,res)=>{
+  const {id} = req.params
+  const campground = await Campground.findByIdAndUpdate(id, {...req.body.campground})
+  res.redirect(`/campgrounds/${campground._id}`)
+})
+
+app.delete("/campgrounds/:id", async(req,res)=>{
+  const {id} = req.params
+  await Campground.findByIdAndDelete(id)
+  res.redirect("/campgrounds")
 })
 
 app.listen(PORT, ()=>{
