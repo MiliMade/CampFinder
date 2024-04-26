@@ -39,7 +39,7 @@ app.get("/campgrounds", async(req,res)=>{
   res.render("campgrounds/index", {campgrounds})
 })
 
-app.get("/campgrounds/new", (req,res)=>{
+app.get("/campgrounds/new", (req,res)=>{ 
   res.render("campgrounds/new")
 })
 
@@ -63,7 +63,7 @@ app.get("/campgrounds/:id/edit", async(req,res)=>{
   res.render("campgrounds/edit", {campground})
 })
 
-app.put("/campgrounds/:id", async(req,res)=>{
+app.put("/campgrounds/:id", async(req,res)=>{ 
   const {id} = req.params
   const campground = await Campground.findByIdAndUpdate(id, {...req.body.campground})
   res.redirect(`/campgrounds/${campground._id}`)
@@ -74,7 +74,7 @@ app.delete("/campgrounds/:id", async(req,res)=>{
   await Campground.findByIdAndDelete(id)
   res.redirect("/campgrounds")
 })
-
+ 
 app.listen(PORT, ()=>{
   console.log(`App is running on port ${PORT}`)
 })
