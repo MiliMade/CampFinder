@@ -43,10 +43,15 @@ app.get("/campgrounds/new", (req,res)=>{
   res.render("campgrounds/new")
 })
 
-app.post("/campgrounds", async(req,res)=>{
+app.post("/campgrounds", async(err, req, res, next)=>{
+  try{
   const campground = new Campground(req.body.campground)
   await campground.save()
   res.redirect(`/campgrounds/${campground._id}`)
+  }
+  catch(err){
+    next(err)
+  }
 })
 
 
@@ -63,10 +68,15 @@ app.get("/campgrounds/:id/edit", async(req,res)=>{
   res.render("campgrounds/edit", {campground})
 })
 
-app.put("/campgrounds/:id", async(req,res)=>{ 
+app.put("/campgrounds/:id", async(err, req, res, next)=>{ 
+  try{
   const {id} = req.params
   const campground = await Campground.findByIdAndUpdate(id, {...req.body.campground})
   res.redirect(`/campgrounds/${campground._id}`)
+  }
+  catch(err){
+    next(err)
+  }
 })
 
 app.delete("/campgrounds/:id", async(req,res)=>{
@@ -74,7 +84,11 @@ app.delete("/campgrounds/:id", async(req,res)=>{
   await Campground.findByIdAndDelete(id)
   res.redirect("/campgrounds")
 })
- 
+
+app.use((req,res)=>{
+  res.send("Oh boy! There's a problem!")
+})
+
 app.listen(PORT, ()=>{
   console.log(`App is running on port ${PORT}`)
 })
