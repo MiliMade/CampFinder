@@ -6,6 +6,7 @@ import {Campground} from "./models/campground.js"
 import methodOverride from "method-override"
 import ejsMate from "ejs-mate"
 import { catchAsync } from "./utils/catchAsync.js"
+import { ExpressError } from "./utils/ExpressError.js"
 
 const app = express()
 const PORT = 8080
@@ -79,11 +80,12 @@ app.delete("/campgrounds/:id", async(req,res)=>{
 })
 
 app.all('*', (req, res, next)=>{
-  res.send('404!!!!')
+  next( new ExpressError('Page not found', 404))
 })
 
 app.use((err, req,res, next)=>{
-  res.send("Oh boy! There's a problem!")
+  const {statusCode = 500, message = 'Something went wrong'} = err
+  res.status(statusCode).send(message)
 })
 
 app.listen(PORT, ()=>{
