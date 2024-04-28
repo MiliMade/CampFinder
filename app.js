@@ -78,7 +78,11 @@ app.delete("/campgrounds/:id", async(req,res)=>{
   res.redirect("/campgrounds")
 })
 
-app.use((err, req, res, next)=>{
+app.all('*', (req, res, next)=>{
+  res.send('404!!!!')
+})
+
+app.use((err, req,res, next)=>{
   res.send("Oh boy! There's a problem!")
 })
 
