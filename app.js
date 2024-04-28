@@ -5,6 +5,7 @@ import mongoose from "mongoose"
 import {Campground} from "./models/campground.js"
 import methodOverride from "method-override"
 import ejsMate from "ejs-mate"
+import { catchAsync } from "./utils/catchAsync.js"
 
 const app = express()
 const PORT = 8080
@@ -43,16 +44,13 @@ app.get("/campgrounds/new", (req,res)=>{
   res.render("campgrounds/new")
 })
 
-app.post("/campgrounds", async(err, req, res, next)=>{
-  try{
+app.post("/campgrounds", catchAsync(async(req, res, next)=>{
+
   const campground = new Campground(req.body.campground)
   await campground.save()
   res.redirect(`/campgrounds/${campground._id}`)
-  }
-  catch(err){
-    next(err)
-  }
-})
+
+}))
 
 
 
@@ -68,16 +66,11 @@ app.get("/campgrounds/:id/edit", async(req,res)=>{
   res.render("campgrounds/edit", {campground})
 })
 
-app.put("/campgrounds/:id", async(err, req, res, next)=>{ 
-  try{
+app.put("/campgrounds/:id", catchAsync(async(req, res, next)=>{ 
   const {id} = req.params
   const campground = await Campground.findByIdAndUpdate(id, {...req.body.campground})
   res.redirect(`/campgrounds/${campground._id}`)
-  }
-  catch(err){
-    next(err)
-  }
-})
+}))
 
 app.delete("/campgrounds/:id", async(req,res)=>{
   const {id} = req.params
@@ -85,7 +78,7 @@ app.delete("/campgrounds/:id", async(req,res)=>{
   res.redirect("/campgrounds")
 })
 
-app.use((req,res)=>{
+app.use((err, req, res, next)=>{
   res.send("Oh boy! There's a problem!")
 })
 
