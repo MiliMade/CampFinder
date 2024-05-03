@@ -7,7 +7,7 @@ import methodOverride from "method-override"
 import ejsMate from "ejs-mate"
 import { catchAsync } from "./utils/catchAsync.js"
 import { ExpressError } from "./utils/ExpressError.js"
-import Joi from "joi"
+import { campgroundSchema } from "./schemas.js"
 
 const app = express()
 const PORT = 8080
@@ -46,17 +46,7 @@ app.get("/campgrounds/new", (req, res) => {
   res.render("campgrounds/new")
 })
 
-app.post("/campgrounds", catchAsync(async (req, res, next) => {
-  // if(!req.body.campground)  throw new ExpressError("Please enter a campground" , 400)
-  const campgroundSchema = Joi.object({
-    campground: Joi.object({
-      title: Joi.string().required(),
-      price: Joi.number().min(0).required(),
-      description: Joi.string().required(),
-      location: Joi.string().required(),
-      image: Joi.string().required()
-    }).required()
-  })
+const validateCampground = (req, res, next) =>{
   const result = campgroundSchema.validate(req.body)
   console.log (result.details)
   const {error} = result
@@ -64,7 +54,13 @@ app.post("/campgrounds", catchAsync(async (req, res, next) => {
   if (error) {
     const msg = error.details.map(el => el.message).join(',')
     throw new ExpressError(msg, 400)
+  }else{
+    next()
   }
+}
+
+app.post("/campgrounds", validateCampground, catchAsync(async (req, res, next) => {
+
   const campground = new Campground(req.body.campground)
   await campground.save()
   res.redirect(`/campgrounds/${campground._id}`)
@@ -85,7 +81,7 @@ app.get("/campgrounds/:id/edit", async (req, res) => {
   res.render("campgrounds/edit", { campground })
 })
 
-app.put("/campgrounds/:id", catchAsync(async (req, res, next) => {
+app.put("/campgrounds/:id", validateCampground, catchAsync(async (req, res, next) => {
   const { id } = req.params
   const campground = await Campground.findByIdAndUpdate(id, { ...req.body.campground })
   res.redirect(`/campgrounds/${campground._id}`)
